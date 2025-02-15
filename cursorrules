@@ -1,0 +1,14 @@
+We are going to build a dashboard related to performance of a bussines division in regards to collections of receivables, i will provide all the data necesary.
+the dashboard will be build using shadcn/ui and it will consist of a basic main dashboard analitics page and then a side bar menu to navigate to other pages.
+the main pages wil be, dashboard, and then actions, shadcn already has a task list page, so we will use that.
+the dabatabase will be using google sheets, and the data will be provided in the sheets.
+the dashboard will be build using nextjs, shadcn/ui, lucid icon, google sheets api, and google auth.
+## stack 
+React
+Nextjs
+Shadcn/ui
+tailwind css
+typescript
+Google sheets api
+Google auth
+
