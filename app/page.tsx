@@ -18,14 +18,16 @@ function combineData(ppaData: TransformedData, mcsData: TransformedData, epmData
   ];
 
   // Helper function to average data points for the same month
-  const averageMonthlyData = (data1: any[], data2: any[], data3: any[]) => {
-    const monthMap = new Map();
+  const averageMonthlyData = (data1: Array<{ month: string; target: number; actual: number }>, 
+                             data2: Array<{ month: string; target: number; actual: number }>, 
+                             data3: Array<{ month: string; target: number; actual: number }>) => {
+    const monthMap = new Map<string, { total: { actual: number; target: number }; count: number }>();
     
     [...data1, ...data2, ...data3].forEach(item => {
       if (!monthMap.has(item.month)) {
         monthMap.set(item.month, { total: { actual: 0, target: 0 }, count: 0 });
       }
-      const current = monthMap.get(item.month);
+      const current = monthMap.get(item.month)!;
       current.total.actual += item.actual;
       current.total.target += item.target;
       current.count += 1;
@@ -38,12 +40,32 @@ function combineData(ppaData: TransformedData, mcsData: TransformedData, epmData
     }));
   };
 
-  return {
+  // Calculate total amounts
+  const totalOver30 = ppaData.totalOver30 + mcsData.totalOver30 + epmData.totalOver30;
+  const totalOver90 = ppaData.totalOver90 + mcsData.totalOver90 + epmData.totalOver90;
+  const totalFcBdEoq = ppaData.totalFcBdEoq + mcsData.totalFcBdEoq + epmData.totalFcBdEoq;
+  const pendingActionsCount = ppaData.pendingActionsCount + mcsData.pendingActionsCount + epmData.pendingActionsCount;
+
+  // Combine actions if they exist
+  const actions = [
+    ...(ppaData.actions || []),
+    ...(mcsData.actions || []),
+    ...(epmData.actions || [])
+  ];
+
+  const result: TransformedData = {
     over30Data: averageMonthlyData(ppaData.over30Data, mcsData.over30Data, epmData.over30Data),
     over90Data: averageMonthlyData(ppaData.over90Data, mcsData.over90Data, epmData.over90Data),
     over30PerformanceData: allOver30Data,
-    over90PerformanceData: allOver90Data
+    over90PerformanceData: allOver90Data,
+    totalOver30,
+    totalOver90,
+    pendingActionsCount,
+    totalFcBdEoq,
+    actions
   };
+
+  return result;
 }
 
 export default async function Page() {
@@ -56,17 +78,6 @@ export default async function Page() {
 
   // Combine data from all divisions
   const data = combineData(ppaData, mcsData, epmData);
-
-  // Calculate total amounts for over30 and over90
-  const totalOver30Amount = data.over30PerformanceData.reduce((sum, item) => {
-    const amount = parseFloat(item.amount.replace(/[$,]/g, ''));
-    return sum + (isNaN(amount) ? 0 : amount);
-  }, 0);
-
-  const totalOver90Amount = data.over90PerformanceData.reduce((sum, item) => {
-    const amount = parseFloat(item.amount.replace(/[$,]/g, ''));
-    return sum + (isNaN(amount) ? 0 : amount);
-  }, 0);
 
   // Format currency
   const formatCurrency = (amount: number) => {
@@ -83,9 +94,9 @@ export default async function Page() {
       <h1 className="text-3xl font-bold">Dashboard Overview</h1>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {[
-          { label: "Pending Actions", value: data.over30PerformanceData.length + data.over90PerformanceData.length },
-          { label: "Over 30 Days Impact", value: formatCurrency(totalOver30Amount) },
-          { label: "Over 90 Days Impact", value: formatCurrency(totalOver90Amount) },
+          { label: "Pending Actions", value: data.pendingActionsCount },
+          { label: "Over 30 Days Impact", value: formatCurrency(data.totalOver30) },
+          { label: "Over 90 Days Impact", value: formatCurrency(data.totalOver90) },
           { label: "Critical Cases", value: data.over90PerformanceData.length },
         ].map((item, index) => (
           <div key={index} className="rounded-lg border p-4">

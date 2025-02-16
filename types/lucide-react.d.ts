@@ -15,4 +15,6 @@ declare module 'lucide-react' {
   export const Trash2: ComponentType<IconProps>
   export const TrendingUp: ComponentType<IconProps>
   export const Pencil: ComponentType<IconProps>
+  export const Check: ComponentType<IconProps>
+  export const ChevronDown: ComponentType<IconProps>
 } 
