@@ -122,7 +122,7 @@ CREATE TABLE IF NOT EXISTS actions_data (
 -- Create a view for sorted actions
 CREATE OR REPLACE VIEW sorted_actions_data AS
 SELECT * FROM actions_data
-ORDER BY action_requested_on DESC;
+ORDER BY total DESC;
 
 -- Create trigger to update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()

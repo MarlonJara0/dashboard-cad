@@ -67,6 +67,9 @@ export default function MCSDashboardPage() {
   return (
     <div className="flex flex-col gap-4">
       <h1 className="text-3xl font-bold">MCS Overview</h1>
+      <div className="flex justify-end">
+        <p className="text-sm text-muted-foreground mb-2">Report as of 01/31/2025</p>
+      </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

@@ -1,3 +1,5 @@
+'use client'
+
 import { supabase } from './supabase'
 
 export interface DashboardData {
@@ -144,13 +146,13 @@ export async function fetchDashboardData(entity: 'PPA' | 'MCS' | 'EPM'): Promise
 
     // Fetch actions data
     const { data: actionsData, error: actionsError } = await supabase
-      .from('actions_data')
+      .from('sorted_actions_data')
       .select('*')
-      .eq('entity', entity)
-      .order('action_requested_on', { ascending: false });
+      .eq('entity', entity);
 
     if (actionsError) {
       console.error('Error fetching actions:', actionsError);
+      throw actionsError;
     }
 
     // Fetch total balances
@@ -192,19 +194,23 @@ export async function fetchDashboardData(entity: 'PPA' | 'MCS' | 'EPM'): Promise
     }
 
     // Transform top customers data
-    const over30PerformanceData = (topCustomers30 || []).map(item => ({
-      customer: item.customer_name,
-      amount: item.total_over30.toString(),
-      status: 'Over 30',
-      daysOverdue: '30+'
-    }));
+    const over30PerformanceData = (topCustomers30 || [])
+      .map(item => ({
+        customer: item.customer_name,
+        amount: item.total_over30.toString(),
+        status: 'Over 30',
+        daysOverdue: '30+'
+      }))
+      .sort((a, b) => parseFloat(b.amount) - parseFloat(a.amount));
 
-    const over90PerformanceData = (topCustomers90 || []).map(item => ({
-      customer: item.customer_name,
-      amount: item.total_over90.toString(),
-      status: 'Over 90',
-      daysOverdue: '90+'
-    }));
+    const over90PerformanceData = (topCustomers90 || [])
+      .map(item => ({
+        customer: item.customer_name,
+        amount: item.total_over90.toString(),
+        status: 'Over 90',
+        daysOverdue: '90+'
+      }))
+      .sort((a, b) => parseFloat(b.amount) - parseFloat(a.amount));
 
     return {
       over30Data,

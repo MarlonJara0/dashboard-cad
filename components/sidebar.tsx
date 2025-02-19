@@ -20,7 +20,7 @@ export function Sidebar({ className }: SidebarProps) {
             CAD Collections Overview
           </h1>
         </div>
-        
+
         {/* PPA Division */}
         <div className="px-3 py-2">
           <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">

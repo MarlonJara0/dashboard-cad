@@ -48,10 +48,9 @@ export default function EPMActionsPage() {
   async function fetchActions() {
     try {
       const { data, error } = await supabase
-        .from('actions_data')
+        .from('sorted_actions_data')
         .select('id, parent_name, action_requested_on, action_owner, comment, total')
         .eq('entity', 'EPM')
-        .order('action_requested_on', { ascending: false })
         
       if (error) {
         console.error('Error fetching actions:', error)
