@@ -83,15 +83,15 @@ export default function MCSDashboardPage() {
             </p>
           </CardContent>
         </Card>
-        <div className="rounded-lg border p-4">
+        <div className="rounded-lg border p-4 bg-white">
           <h2 className="font-semibold">Over 30 Days Balance</h2>
           <p className="text-2xl font-bold">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(data.totalOver30)}</p>
         </div>
-        <div className="rounded-lg border p-4">
+        <div className="rounded-lg border p-4 bg-white">
           <h2 className="font-semibold">Over 90 Days Balance</h2>
           <p className="text-2xl font-bold">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(data.totalOver90)}</p>
         </div>
-        <div className="rounded-lg border p-4">
+        <div className="rounded-lg border p-4 bg-white">
           <h2 className="font-semibold">Total Forecasted Bad Debt EOQ</h2>
           <p className="text-2xl font-bold">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(data.totalFcBdEoq)}</p>
         </div>
