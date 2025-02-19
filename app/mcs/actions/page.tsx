@@ -31,6 +31,8 @@ export default function MCSActionsPage() {
   const [actions, setActions] = useState<Action[]>([])
   const [loading, setLoading] = useState(true)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [actionToDelete, setActionToDelete] = useState<number | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
@@ -127,21 +129,31 @@ export default function MCSActionsPage() {
 
   const handleDeleteAction = async (id: number) => {
     try {
+      setIsSubmitting(true)
       const { error } = await supabase
         .from('actions_data')
         .delete()
         .eq('id', id)
 
       if (error) {
-        console.error('Error deleting action:', error)
+        setError('Error deleting action')
         return
       }
 
-      // Refresh the actions list
+      setSuccess('Action deleted successfully')
       fetchActions()
     } catch (error) {
-      console.error('Error:', error)
+      setError('Error deleting action')
+    } finally {
+      setIsSubmitting(false)
+      setIsDeleteDialogOpen(false)
+      setActionToDelete(null)
     }
+  }
+
+  const confirmDelete = (id: number) => {
+    setActionToDelete(id)
+    setIsDeleteDialogOpen(true)
   }
 
   const handleEditComment = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -263,6 +275,35 @@ export default function MCSActionsPage() {
           </DialogContent>
         </Dialog>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Delete</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this action? This cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsDeleteDialogOpen(false)}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => actionToDelete && handleDeleteAction(actionToDelete)}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Deleting...' : 'Delete'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Card>
         <CardHeader>
           <CardTitle>Actions List</CardTitle>
@@ -295,7 +336,7 @@ export default function MCSActionsPage() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => handleDeleteAction(action.id)}
+                    onClick={() => confirmDelete(action.id)}
                     className="hover:bg-red-50"
                   >
                     <Trash2 className="h-4 w-4 text-red-500" />
