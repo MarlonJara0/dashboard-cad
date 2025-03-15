@@ -205,7 +205,6 @@ export async function fetchDashboardData(entity: 'PPA' | 'MCS' | 'EPM', month?: 
       .from('count_actions_per_entity')
       .select('action_count')
       .eq('entity', entity)
-      .eq('month_of_report', normalizedMonth)
       .single();
 
     if (actionsCountError) {
@@ -213,24 +212,9 @@ export async function fetchDashboardData(entity: 'PPA' | 'MCS' | 'EPM', month?: 
     }
 
     console.log('Actions count data from count_actions_per_entity:', actionsCount);
-
-    // Always fetch from actions_data directly - this is the most reliable source
-    console.log('Fetching actions directly from actions_data table...');
     
-    const { data: actionsData, error: actionsDataError } = await supabase
-      .from('actions_data')
-      .select('id, status, entity')
-      .eq('entity', entity)
-      .eq('status', 'open');
-      
-    if (actionsDataError) {
-      console.error('Error fetching actions data:', actionsDataError);
-    } else {
-      console.log(`Found ${actionsData?.length || 0} pending actions in actions_data table:`, actionsData);
-    }
-    
-    // Use the count from actions_data, fallback to count_actions_per_entity if needed
-    const pendingActionsCount = actionsData?.length || actionsCount?.action_count || 0;
+    // Use the count from the view
+    const pendingActionsCount = actionsCount?.action_count || 0;
 
     // Fetch total forecast bad debt
     const { data: fcBdData, error: fcBdError } = await supabase
