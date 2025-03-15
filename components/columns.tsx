@@ -1,0 +1,40 @@
+"use client"
+
+import { ColumnDef } from "@tanstack/react-table"
+
+type PerformanceData = {
+  customer: string
+  amount: string
+  status: string
+  daysOverdue: string
+}
+
+export const columns: ColumnDef<PerformanceData>[] = [
+  {
+    accessorKey: "customer",
+    header: "Customer",
+  },
+  {
+    accessorKey: "amount",
+    header: "Amount",
+    cell: ({ row }) => {
+      const amount = parseFloat(row.getValue("amount"))
+      const formatted = new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+      }).format(amount)
+      return <div className="text-right font-medium">{formatted}</div>
+    },
+  },
+  {
+    accessorKey: "status",
+    header: "Status",
+  },
+  {
+    accessorKey: "daysOverdue",
+    header: "Days Overdue",
+    cell: ({ row }) => {
+      return <div className="text-right">{row.getValue("daysOverdue")}</div>
+    },
+  },
+] 

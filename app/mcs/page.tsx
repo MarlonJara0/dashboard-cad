@@ -4,7 +4,7 @@ import { LineChartComponent } from "@/components/line-chart"
 import { BadDebtChart } from "@/components/bad-debt-chart"
 import { PerformanceTables } from "@/components/performance-tables"
 import { fetchDashboardData, subscribeToActions, TransformedData } from "@/lib/dashboard-data"
-import { supabase } from "@/lib/supabase"
+import { MonthSelector } from "@/components/month-selector"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { ListTodo } from "lucide-react"
 import { useState, useEffect } from "react"
@@ -16,10 +16,12 @@ export const revalidate = 0;
 export default function MCSDashboardPage() {
   const [data, setData] = useState<TransformedData | null>(null)
   const [loading, setLoading] = useState(true)
+  const [selectedMonth, setSelectedMonth] = useState<string>()
 
-  const fetchData = async () => {
+  const fetchData = async (month?: string) => {
     try {
-      const dashboardData = await fetchDashboardData('MCS')
+      console.log("Fetching MCS data for month:", month);
+      const dashboardData = await fetchDashboardData('MCS', month)
       setData(dashboardData)
     } catch (error) {
       console.error('Error fetching dashboard data:', error)
@@ -29,18 +31,18 @@ export default function MCSDashboardPage() {
   }
 
   useEffect(() => {
-    fetchData()
+    fetchData(selectedMonth)
 
     // Subscribe to real-time updates
     const unsubscribe = subscribeToActions('MCS', () => {
-      fetchData()
+      fetchData(selectedMonth)
     })
 
     return () => {
       // Cleanup subscription on component unmount
       unsubscribe()
     }
-  }, [])
+  }, [selectedMonth])
 
   if (loading) {
     return (
@@ -67,8 +69,17 @@ export default function MCSDashboardPage() {
   return (
     <div className="flex flex-col gap-4">
       <h1 className="text-3xl font-bold">MCS Overview</h1>
-      <div className="flex justify-end">
-        <p className="text-sm text-muted-foreground mb-2">Report as of 01/31/2025</p>
+      <div className="flex justify-end items-center gap-4">
+        <MonthSelector 
+          currentMonth={selectedMonth}
+          onMonthChange={(month) => {
+            console.log("Month selected:", month);
+            setSelectedMonth(month);
+          }}
+        />
+        <p className="text-sm text-muted-foreground">
+          Report as of {selectedMonth || 'Loading...'}
+        </p>
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
@@ -111,7 +122,7 @@ export default function MCSDashboardPage() {
           yAxisDomain={[0, 30]}
           yAxisTicks={[0, 5, 10, 15, 20, 25, 30]}
         />
-        <BadDebtChart division="MCS" />
+        <BadDebtChart division="MCS" month={selectedMonth} />
       </div>
       <PerformanceTables 
         over30Data={data.over30PerformanceData}

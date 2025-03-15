@@ -8,6 +8,7 @@ import { supabase } from "@/lib/supabase";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { ListTodo } from "lucide-react";
 import { useState, useEffect } from "react";
+import { MonthSelector } from "@/components/month-selector";
 
 // Define chart config
 const chartConfig = {
@@ -35,10 +36,12 @@ interface ChartData {
 export default function PPADashboardPage() {
   const [data, setData] = useState<TransformedData | null>(null)
   const [loading, setLoading] = useState(true)
+  const [selectedMonth, setSelectedMonth] = useState<string>();
 
-  const fetchData = async () => {
+  const fetchData = async (month?: string) => {
     try {
-      const dashboardData = await fetchDashboardData('PPA')
+      console.log("Fetching PPA data for month:", month);
+      const dashboardData = await fetchDashboardData('PPA', month)
       setData(dashboardData)
     } catch (error) {
       console.error('Error fetching dashboard data:', error)
@@ -48,18 +51,18 @@ export default function PPADashboardPage() {
   }
 
   useEffect(() => {
-    fetchData()
+    fetchData(selectedMonth);
 
     // Subscribe to real-time updates
     const unsubscribe = subscribeToActions('PPA', () => {
-      fetchData()
-    })
+      fetchData(selectedMonth);
+    });
 
     return () => {
       // Cleanup subscription on component unmount
-      unsubscribe()
+      unsubscribe();
     }
-  }, [])
+  }, [selectedMonth]);
 
   if (loading) {
     return (
@@ -86,8 +89,17 @@ export default function PPADashboardPage() {
   return (
     <div className="flex flex-col gap-4">
       <h1 className="text-3xl font-bold">PPA Overview</h1>
-      <div className="flex justify-end">
-        <p className="text-sm text-muted-foreground mb-2">Report as of 01/31/2025</p>
+      <div className="flex justify-end items-center gap-4">
+        <MonthSelector 
+          currentMonth={selectedMonth}
+          onMonthChange={(month) => {
+            console.log("Month selected:", month);
+            setSelectedMonth(month);
+          }}
+        />
+        <p className="text-sm text-muted-foreground">
+          Report as of {selectedMonth || 'Loading...'}
+        </p>
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
@@ -130,7 +142,7 @@ export default function PPADashboardPage() {
           yAxisDomain={[0, 30]}
           yAxisTicks={[0, 5, 10, 15, 20, 25, 30]}
         />
-        <BadDebtChart division="PPA" />
+        <BadDebtChart division="PPA" month={selectedMonth} />
       </div>
       <PerformanceTables 
         over30Data={data.over30PerformanceData}

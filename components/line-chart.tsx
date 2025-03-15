@@ -1,14 +1,8 @@
 "use client"
 
-import { memo } from 'react'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, ComposedChart } from 'recharts'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import React from "react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Area, ComposedChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
 interface LineChartProps {
   title: string
@@ -22,33 +16,25 @@ interface LineChartProps {
   yAxisTicks?: number[]
 }
 
-const CustomTooltip = memo(({ active, payload, label }: any) => {
+const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
-    // Get unique entries by dataKey
-    const uniqueEntries = payload.reduce((acc: any[], entry: any) => {
-      if (!entry.name.includes('Area') && !acc.find(e => e.dataKey === entry.dataKey)) {
-        acc.push(entry);
-      }
-      return acc;
-    }, []);
-
     return (
       <div className="rounded-lg border bg-white p-2 shadow-sm">
-        <p className="font-medium">{label}</p>
-        {uniqueEntries.map((entry: any) => (
-          <p key={entry.name} style={{ color: entry.color }}>
-            {entry.name}: {entry.value}%
+        <p className="text-sm text-muted-foreground">{label}</p>
+        {payload.map((item: any, index: number) => (
+          <p key={index} className="text-sm font-bold" style={{ color: item.color }}>
+            {item.name}: {item.value.toFixed(1)}%
           </p>
         ))}
       </div>
     )
   }
   return null
-});
+}
 
 CustomTooltip.displayName = 'CustomTooltip';
 
-export const LineChartComponent = memo(function LineChartComponent({
+export const LineChartComponent = React.memo(function LineChartComponent({
   title,
   description,
   data: readonlyData,
@@ -114,8 +100,8 @@ export const LineChartComponent = memo(function LineChartComponent({
                 horizontal={true}
                 stroke="hsl(var(--border))"
               />
-              <XAxis 
-                dataKey="month" 
+              <XAxis
+                dataKey="month"
                 tickFormatter={(value) => value.slice(0, 3)}
                 tickLine={false}
                 axisLine={false}
@@ -125,7 +111,7 @@ export const LineChartComponent = memo(function LineChartComponent({
                   fill: "hsl(var(--muted-foreground))"
                 }}
               />
-              <YAxis 
+              <YAxis
                 tickFormatter={(value) => `${value}%`}
                 domain={yAxisDomain}
                 ticks={yAxisTicks}

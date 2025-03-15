@@ -8,6 +8,7 @@ import { supabase } from "@/lib/supabase"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { ListTodo } from "lucide-react"
 import { useState, useEffect } from "react"
+import { MonthSelector } from "@/components/month-selector"
 
 // Disable caching
 export const dynamic = 'force-dynamic';
@@ -27,10 +28,12 @@ const chartConfig = {
 export default function EPMDashboardPage() {
   const [data, setData] = useState<TransformedData | null>(null)
   const [loading, setLoading] = useState(true)
+  const [selectedMonth, setSelectedMonth] = useState<string>();
 
-  const fetchData = async () => {
+  const fetchData = async (month?: string) => {
     try {
-      const dashboardData = await fetchDashboardData('EPM')
+      console.log("Fetching EPM data for month:", month);
+      const dashboardData = await fetchDashboardData('EPM', month)
       setData(dashboardData)
     } catch (error) {
       console.error('Error fetching dashboard data:', error)
@@ -40,18 +43,18 @@ export default function EPMDashboardPage() {
   }
 
   useEffect(() => {
-    fetchData()
+    fetchData(selectedMonth);
 
     // Subscribe to real-time updates
     const unsubscribe = subscribeToActions('EPM', () => {
-      fetchData()
-    })
+      fetchData(selectedMonth);
+    });
 
     return () => {
       // Cleanup subscription on component unmount
-      unsubscribe()
+      unsubscribe();
     }
-  }, [])
+  }, [selectedMonth]);
 
   if (loading) {
     return (
@@ -78,8 +81,17 @@ export default function EPMDashboardPage() {
   return (
     <div className="flex flex-col gap-4">
       <h1 className="text-3xl font-bold">EPM Overview</h1>
-      <div className="flex justify-end">
-        <p className="text-sm text-muted-foreground mb-2">Report as of 01/31/2025</p>
+      <div className="flex justify-end items-center gap-4">
+        <MonthSelector 
+          currentMonth={selectedMonth}
+          onMonthChange={(month) => {
+            console.log("Month selected:", month);
+            setSelectedMonth(month);
+          }}
+        />
+        <p className="text-sm text-muted-foreground">
+          Report as of {selectedMonth || 'Loading...'}
+        </p>
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
@@ -122,7 +134,7 @@ export default function EPMDashboardPage() {
           yAxisDomain={[0, 30]}
           yAxisTicks={[0, 5, 10, 15, 20, 25, 30]}
         />
-        <BadDebtChart division="EPM" />
+        <BadDebtChart division="EPM" month={selectedMonth} />
       </div>
       <PerformanceTables 
         over30Data={data.over30PerformanceData}
