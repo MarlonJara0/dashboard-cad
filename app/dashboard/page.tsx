@@ -1,15 +1,15 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { fetchDashboardData, type TransformedData } from '@/lib/dashboard-data'
 import { DashboardHeader } from '@/components/dashboard-header'
 import { DashboardShell } from '@/components/dashboard-shell'
-import { MonthSelector } from '@/components/MonthSelector'
-import { DashboardTabs } from '@/components/dashboard-tabs'
+import { MonthSelector } from '@/app/components/MonthSelector'
+import { DashboardTabs } from '@/app/components/dashboard-tabs'
 import { Skeleton } from '@/components/ui/skeleton'
 
-export default function DashboardPage() {
+function DashboardContent() {
   const searchParams = useSearchParams()
   const [data, setData] = useState<TransformedData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -62,5 +62,25 @@ export default function DashboardPage() {
       </DashboardHeader>
       {data && <DashboardTabs data={data} />}
     </DashboardShell>
+  )
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={
+      <DashboardShell>
+        <DashboardHeader
+          heading="Dashboard"
+          text="Overview of your collection metrics."
+        >
+          <Skeleton className="w-[180px] h-10" />
+        </DashboardHeader>
+        <div className="grid gap-4">
+          <Skeleton className="h-[500px]" />
+        </div>
+      </DashboardShell>
+    }>
+      <DashboardContent />
+    </Suspense>
   )
 } 

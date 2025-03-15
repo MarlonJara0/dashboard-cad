@@ -1,11 +1,11 @@
 'use client'
 
-import { MonthSelector } from './MonthSelector'
+import { ReactNode } from 'react'
 
 interface DashboardHeaderProps {
   heading: string
   text?: string
-  children?: React.ReactNode
+  children?: ReactNode
 }
 
 export function DashboardHeader({ heading, text, children }: DashboardHeaderProps) {

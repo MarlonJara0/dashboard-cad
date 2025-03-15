@@ -1,13 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { fetchAvailableMonths } from '@/lib/dashboard-data'
 
 interface MonthSelectorProps {
@@ -30,27 +23,23 @@ export function MonthSelector({ onMonthChange }: MonthSelectorProps) {
     loadMonths()
   }, [onMonthChange])
 
+  const handleMonthChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const month = event.target.value
+    setSelectedMonth(month)
+    onMonthChange(month)
+  }
+
   return (
-    <Select
+    <select
       value={selectedMonth}
-      onValueChange={(value) => {
-        setSelectedMonth(value)
-        onMonthChange(value)
-      }}
+      onChange={handleMonthChange}
+      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
     >
-      <SelectTrigger className="w-[180px]">
-        <SelectValue placeholder="Select month" />
-      </SelectTrigger>
-      <SelectContent>
-        {months.map((month) => (
-          <SelectItem key={month} value={month}>
-            {new Date(month).toLocaleDateString('en-US', {
-              month: 'long',
-              year: 'numeric',
-            })}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+      {months.map((month) => (
+        <option key={month} value={month}>
+          {month}
+        </option>
+      ))}
+    </select>
   )
 } 
